@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lokasi Geospasial</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 800px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .content {
+      padding: 30px;
+    }
+
+    .form-section {
+      background: #f8f9fa;
+      padding: 25px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      border: 2px solid #e9ecef;
+    }
+
+    .form-section h2 {
+      font-size: 18px;
+      color: #667eea;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .form-section h2::before {
+      content: "📍";
+      font-size: 24px;
+    }
+
+    form {
+      display: grid;
+      gap: 15px;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .input-group label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #495057;
+    }
+
+    input {
+      padding: 12px 15px;
+      border: 2px solid #e9ecef;
+      border-radius: 10px;
+      font-size: 15px;
+      transition: all 0.3s ease;
+      background: white;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    }
+
+    input.error {
+      border-color: #dc3545;
+      background-color: #fff5f5;
+    }
+
+    input.error:focus {
+      box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.1);
+    }
+
+    .error-message {
+      color: #dc3545;
+      font-size: 13px;
+      margin-top: 5px;
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .error-message.show {
+      display: block;
+    }
+
+    .coordinate-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    button {
+      padding: 14px 28px;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    button[type="submit"] {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    button[type="submit"]:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+    }
+
+    button[type="submit"]:active {
+      transform: translateY(0);
+    }
+
+    .list-section {
+      margin-top: 20px;
+    }
+
+    .list-section h2 {
+      font-size: 18px;
+      color: #667eea;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .list-section h2::before {
+      content: "🗺️";
+      font-size: 24px;
+    }
+
+    #list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    #list li {
+      background: white;
+      padding: 18px;
+      border-radius: 12px;
+      border: 2px solid #e9ecef;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.3s ease;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    #list li:hover {
+      border-color: #667eea;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+      transform: translateX(5px);
+    }
+
+    .location-info {
+      flex: 1;
+    }
+
+    .location-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: #212529;
+      margin-bottom: 5px;
+    }
+
+    .location-coords {
+      font-size: 13px;
+      color: #6c757d;
+      font-family: 'Courier New', monospace;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-edit, .btn-delete {
+      padding: 8px 16px;
+      font-size: 13px;
+      border-radius: 8px;
+    }
+
+    .btn-edit {
+      background: #ffc107;
+      color: #000;
+    }
+
+    .btn-edit:hover {
+      background: #ffb300;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(255, 193, 7, 0.4);
+    }
+
+    .btn-delete {
+      background: #dc3545;
+      color: white;
+    }
+
+    .btn-delete:hover {
+      background: #c82333;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(220, 53, 69, 0.4);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: #6c757d;
+    }
+
+    .empty-state::before {
+      content: "📍";
+      font-size: 48px;
+      display: block;
+      margin-bottom: 15px;
+    }
+
+    @media (max-width: 600px) {
+      .coordinate-group {
+        grid-template-columns: 1fr;
+      }
+
+      #list li {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+
+      .action-buttons {
+        width: 100%;
+        justify-content: flex-end;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📌 Data Lokasi Geospasial</h1>
+      <p>Kelola data lokasi dengan MongoDB & Golang</p>
+    </div>
+
+    <div class="content">
+      <div class="form-section">
+        <h2>Tambah Lokasi Baru</h2>
+        <form id="form">
+          <div class="input-group">
+            <label for="name">Nama Lokasi</label>
+            <input type="text" id="name" placeholder="Masukkan nama lokasi" required />
+          </div>
+
+          <div class="coordinate-group">
+            <div class="input-group">
+              <label for="lon">Longitude (Bujur)</label>
+              <input type="number" id="lon" placeholder="107.6191" step="any" required />
+              <span class="error-message" id="lon-error">⚠️ Longitude harus antara -180 sampai 180</span>
+            </div>
+            <div class="input-group">
+              <label for="lat">Latitude (Lintang)</label>
+              <input type="number" id="lat" placeholder="-6.9175" step="any" required />
+              <span class="error-message" id="lat-error">⚠️ Latitude harus antara -90 sampai 90</span>
+            </div>
+          </div>
+
+          <button type="submit">➕ Tambah Lokasi</button>
+        </form>
+      </div>
+
+      <div class="list-section">
+        <h2>Daftar Lokasi Tersimpan</h2>
+        <ul id="list"></ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "http://localhost:8080/locations";
+
+    const form = document.getElementById("form");
+    const list = document.getElementById("list");
+    const lonInput = document.getElementById("lon");
+    const latInput = document.getElementById("lat");
+    const lonError = document.getElementById("lon-error");
+    const latError = document.getElementById("lat-error");
+
+    let editId = null;
+
+    // --- Validasi Koordinat ---
+    function validateCoordinates(lon, lat) {
+      let isValid = true;
+
+      // Validasi Longitude (-180 sampai 180)
+      if (lon < -180 || lon > 180 || isNaN(lon)) {
+        lonInput.classList.add("error");
+        lonError.classList.add("show");
+        isValid = false;
+      } else {
+        lonInput.classList.remove("error");
+        lonError.classList.remove("show");
+      }
+
+      // Validasi Latitude (-90 sampai 90)
+      if (lat < -90 || lat > 90 || isNaN(lat)) {
+        latInput.classList.add("error");
+        latError.classList.add("show");
+        isValid = false;
+      } else {
+        latInput.classList.remove("error");
+        latError.classList.remove("show");
+      }
+
+      return isValid;
+    }
+
+    // Real-time validation saat mengetik
+    lonInput.addEventListener("input", () => {
+      const lon = parseFloat(lonInput.value);
+      if (lonInput.value) {
+        validateCoordinates(lon, parseFloat(latInput.value) || 0);
+      } else {
+        lonInput.classList.remove("error");
+        lonError.classList.remove("show");
+      }
+    });
+
+    latInput.addEventListener("input", () => {
+      const lat = parseFloat(latInput.value);
+      if (latInput.value) {
+        validateCoordinates(parseFloat(lonInput.value) || 0, lat);
+      } else {
+        latInput.classList.remove("error");
+        latError.classList.remove("show");
+      }
+    });
+
+    // --- Load Data ---
+    async function loadData() {
+      list.innerHTML = "";
+      try {
+        const res = await fetch(API_URL);
+        const data = await res.json();
+
+        if (data.length === 0) {
+          list.innerHTML = '<div class="empty-state">Belum ada data lokasi.<br>Silakan tambahkan lokasi baru!</div>';
+          return;
+        }
+
+        data.forEach((loc) => {
+          const li = document.createElement("li");
+          li.innerHTML = `
+            <div class="location-info">
+              <div class="location-name">${loc.name}</div>
+              <div class="location-coords">📍 ${loc.location.coordinates[0]}, ${loc.location.coordinates[1]}</div>
+            </div>
+            <div class="action-buttons">
+              <button class="btn-edit" onclick="editLocation('${loc.id}', '${loc.name}', ${loc.location.coordinates[0]}, ${loc.location.coordinates[1]})">✏️ Edit</button>
+              <button class="btn-delete" onclick="deleteLocation('${loc.id}')">🗑️ Hapus</button>
+            </div>
+          `;
+          list.appendChild(li);
+        });
+      } catch (err) {
+        list.innerHTML = '<div class="empty-state">❌ Gagal memuat data.<br>Pastikan server berjalan!</div>';
+      }
+    }
+
+    // --- Tambah / Update Data ---
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById("name").value.trim();
+      const lon = parseFloat(document.getElementById("lon").value);
+      const lat = parseFloat(document.getElementById("lat").value);
+
+      const data = {
+        name,
+        location: { type: "Point", coordinates: [lon, lat] },
+      };
+
+      try {
+        if (editId) {
+          await fetch(`${API_URL}/${editId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+          });
+          editId = null;
+          form.querySelector("button").innerHTML = "➕ Tambah Lokasi";
+        } else {
+          await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+          });
+        }
+        form.reset();
+        loadData();
+      } catch (err) {
+        alert("❌ Gagal menyimpan data! Pastikan server berjalan.");
+      }
+    });
+
+    // --- Edit Data ---
+    window.editLocation = (id, name, lon, lat) => {
+      document.getElementById("name").value = name;
+      document.getElementById("lon").value = lon;
+      document.getElementById("lat").value = lat;
+      editId = id;
+      form.querySelector("button").innerHTML = "💾 Update Lokasi";
+      
+      // Smooth scroll to form
+      document.querySelector(".form-section").scrollIntoView({ behavior: "smooth" });
+    };
+
+    // --- Hapus Data ---
+    window.deleteLocation = async (id) => {
+      if (confirm("⚠️ Yakin ingin menghapus data ini?")) {
+        try {
+          await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+          loadData();
+        } catch (err) {
+          alert("❌ Gagal menghapus data!");
+        }
+      }
+    };
+
+    // Jalankan saat halaman dibuka
+    loadData();
+  </script>
+</body>
+</html>
